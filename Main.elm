@@ -1,78 +1,35 @@
-import Char exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onInput)
+import Html.Events exposing (..)
 
-main : Program Never Model Msg
 main =
-  Html.beginnerProgram { model = model, view = view, update = update }
-
---- COMPONENTS
-
-hr_comp : Html Msg
-hr_comp =
-  hr [] []
-
---- MODEL
+  Html.beginnerProgram
+    { init = init
+    , view = view
+    , update = update
+    }
 
 type alias Model =
-  { name : String
-  , password : String
-  , passwordAgain : String
+  { topic : String
+  , gifUrl : String
   }
 
-model : Model
-model =
-  Model "" "" ""
+init : (Model, Cmd Msg)
+init =
+  (Model "cats" "waiting.gif", Cmd.none)
 
---- UPDATE
+type Msg = MorePlease
 
-type Msg
-  = Name String
-  | Password String
-  | PasswordAgain String
-
-update : Msg -> Model -> Model
+update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
-    Name name ->
-      { model | name = name }
-    Password password ->
-      { model | password = password }
-    PasswordAgain password ->
-      { model | passwordAgain = password }
-
---- VIEW
+    MorePlease ->
+      (model, Cmd.none)
 
 view : Model -> Html Msg
 view model =
   div []
-    [ input [ type_ "text", placeholder "Name", onInput Name ] []
-    , input [ type_ "password", placeholder "Password", onInput Password ] []
-    , input [ type_ "password", placeholder "Re-enter password", onInput PasswordAgain ] []
-    , viewValidation model
+    [ h2 [] [ text model.topic ]
+    , img [ src model.gifUrl ] []
+    , button [ onClick MorePlease ] [ text "More please!" ]
     ]
-
-viewValidation : Model -> Html msg
-viewValidation model =
-  let
-    (color, message) =
-      let (anyUpper, isLongEnough, passwordsMatch) =
-        ( String.any Char.isUpper model.password
-        , String.length model.password > 8
-        , model.password == model.passwordAgain
-        )
-      in
-        if passwordsMatch
-        && isLongEnough
-        && anyUpper
-        then
-          ("green", "OK")
-        else if not anyUpper then
-          ("red", "Password needs to contain an upper case letter")
-        else if not isLongEnough then
-          ("red", "Password must be a minumum length of 9 characters")
-        else
-          ("red", "Passwords do not match!")
-  in
-    div [ style [("color", color)] ] [ text message ]
